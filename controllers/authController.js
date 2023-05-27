@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator');
 const passport = require('passport');
 const User = require('../models/User');
 
+exports.index = (req, res) => res.send('The api is live');
 exports.signup = [
   body('first_name').trim().notEmpty().escape(),
 
@@ -106,4 +107,13 @@ exports.login = async (req, res, next) => {
   } catch (err) {
     res.status(403).json({ err });
   }
+};
+
+exports.logout = async (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/api');
+  });
 };
