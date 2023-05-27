@@ -66,7 +66,7 @@ module.exports = function setUpPassport(passport) {
       {
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: 'http://localhost:4000/login/facebook/callback',
+        callbackURL: 'http://localhost:4000/api/login/facebook/callback',
         profileFields: [
           'id',
           'emails',
