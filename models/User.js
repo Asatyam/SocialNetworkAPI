@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const UserSchema = new Schema({
-  email: { type: String, required: true },
-  password: { type: String, required: true },
+  email: { type: String },
+  password: { type: String },
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   likes: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   first_name: { type: String },

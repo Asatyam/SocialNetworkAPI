@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 /* eslint-disable no-shadow */
 /* eslint-disable no-param-reassign */
@@ -5,7 +6,7 @@
 const bcryptjs = require('bcryptjs');
 const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = require('passport-jwt').Strategy;
-const FBStrategy = require('passport-facebook').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const User = require('../models/User');
 
@@ -13,6 +14,7 @@ require('dotenv').config();
 
 module.exports = function setUpPassport(passport) {
   passport.serializeUser((user, done) => {
+    console.log('working');
     done(null, user.id);
   });
   passport.deserializeUser(async (id, done) => {
@@ -59,45 +61,40 @@ module.exports = function setUpPassport(passport) {
       (jwtPayload, done) => done(null, jwtPayload)
     )
   );
-
   passport.use(
     'facebook-login',
-    new FBStrategy(
+    new FacebookStrategy(
       {
         clientID: process.env.FACEBOOK_APP_ID,
         clientSecret: process.env.FACEBOOK_APP_SECRET,
-        callbackURL: 'http://localhost:4000/api/login/facebook/callback',
+        callbackURL: 'http://localhost:4000/api/auth/facebook/callback',
         profileFields: [
           'id',
-          'emails',
           'first_name',
           'last_name',
-          'picture.type(medium)',
+          'email',
+          'picture.type(album)',
         ],
       },
-      (accessToken, refreshToken, profile, done) => {
-        const picture = `https://graph.facebook.com/${profile.id}/picture?width=200&height=200&acess_token=${accessToken}`;
-
-        User.findOne({ facebook_id: profile.id }, (err, user) => {
-          if (err) {
-            return done(err);
-          }
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const picture = `https://graph.facebook.com/${profile.id}/picture?width=200&height=200&access_token=${accessToken}`;
+          let user = await User.findOne({ facebook_id: profile.id });
+          console.log({ profile, picture });
           if (!user) {
             user = new User({
+              first_name: profile._json.first_name,
+              last_name: profile._json.last_name,
               facebook_id: profile.id,
-              first_name: profile.first_name,
-              last_name: profile.last_name,
-              email: profile.emails[0].value,
+              email: profile.emails ? profile.emails[0].value : '',
               image_url: picture,
             });
-            user.save((err) => {
-              if (err) console.log(err);
-              return done(err, user);
-            });
-          } else {
-            return done(err, user);
+            await user.save();
           }
-        });
+          return done(null, user);
+        } catch (err) {
+          return done(err);
+        }
       }
     )
   );
