@@ -25,22 +25,28 @@ module.exports = function setUpPassport(passport) {
   });
   passport.use(
     'local-login',
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        const user = await User.findOne({ username });
-        if (!user) {
-          return done(null, false, { messsage: 'User not found' });
-        }
-        bcryptjs.compare(password, user.password, (err, res) => {
-          if (res) {
-            return done(null, user);
+    new LocalStrategy(
+      {
+        usernameField: 'email',
+        passwordField: 'password',
+      },
+      async (username, password, done) => {
+        try {
+          const user = await User.findOne({ email: username });
+          if (!user) {
+            return done(null, false, { messsage: 'User not found' });
           }
-          return done(null, false, { message: 'Incorrect Password' });
-        });
-      } catch (err) {
-        return done(err, false);
+          bcryptjs.compare(password, user.password, (err, res) => {
+            if (res) {
+              return done(null, user);
+            }
+            return done(null, false, { message: 'Incorrect Password' });
+          });
+        } catch (err) {
+          return done(err, false);
+        }
       }
-    })
+    )
   );
 
   passport.use(
