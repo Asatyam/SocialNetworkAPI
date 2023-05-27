@@ -48,7 +48,8 @@ exports.signup = [
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({ errors: errors.array() });
+      res.status(400).json({ errors: errors.array() });
+      return;
     }
     bcryptjs.hash(req.body.password, 10, async (err, hashedPassword) => {
       if (err) {
@@ -63,7 +64,13 @@ exports.signup = [
           last_name: req.body.last_name,
         });
         await user.save();
-        res.status(200).json({ message: 'User created', user });
+        req.login(user, (err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            res.status(200).json({ message: 'User created', user });
+          }
+        });
       } catch (err) {
         // eslint-disable-next-line consistent-return
         return next(err);
