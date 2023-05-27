@@ -13,6 +13,7 @@
     "rules": {
         "no-console":"off",
         "no-process-env":"off",
-        "comma-dangle":"off"
+        "comma-dangle":"off",
+        "no-shadow":"off"
     }
 }

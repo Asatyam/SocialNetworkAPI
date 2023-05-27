@@ -4,6 +4,7 @@ const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
 const connectDB = require('./helpers/mongo');
+const apiRouter = require('./routes/api');
 require('dotenv').config();
 
 const app = express();
@@ -26,3 +27,9 @@ app.use(
 setUpPassport(passport);
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use('/api', cors(), apiRouter);
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});
