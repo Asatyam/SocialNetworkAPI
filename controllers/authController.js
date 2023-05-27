@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
@@ -78,3 +80,30 @@ exports.signup = [
     });
   },
 ];
+
+exports.login = async (req, res, next) => {
+  try {
+    passport.authenticate(
+      'local-login',
+      { session: false },
+      (err, user, info) => {
+        if (err || !user) {
+          return res.status(403).json({ info, err });
+        }
+        req.login(user, { session: false }, (err) => {
+          if (err) {
+            next(err);
+          }
+          const body = {
+            _id: user._id,
+            email: user.email,
+          };
+          const token = jwt.sign({ user: body }, process.env.SECRET);
+          return res.status(200).json({ body, token });
+        });
+      }
+    )(req, res, next);
+  } catch (err) {
+    res.status(403).json({ err });
+  }
+};
