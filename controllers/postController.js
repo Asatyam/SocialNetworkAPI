@@ -15,3 +15,24 @@ exports.getPost = async (req, res) => {
     return res.status(404).send('Post was not found');
   }
 };
+exports.addPost = [
+  body('content', 'content cannot be empty').trim().notEmpty().escape(),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const post = new Post({
+        content: req.body.content,
+        author: req.user.user._id,
+      });
+      await post.save();
+      return res.status(200).send('post added successfully');
+    } catch (err) {
+      console.log(err);
+      return res.status(403).send('Something went wrong');
+    }
+  },
+];

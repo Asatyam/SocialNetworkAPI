@@ -92,5 +92,9 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   postController.getPost
 );
-
+router.post(
+  '/posts',
+  passport.authenticate('jwt', { session: false }),
+  postController.addPost
+);
 module.exports = router;
