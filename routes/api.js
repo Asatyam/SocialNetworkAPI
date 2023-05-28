@@ -77,4 +77,9 @@ router.post(
   passport.authenticate('jwt', { session: false }),
   userController.updateProfile
 );
+router.get(
+  '/users/:userid/getMutuals',
+  passport.authenticate('jwt', { session: false }),
+  userController.getMutuals
+);
 module.exports = router;

@@ -1,11 +1,14 @@
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const Post = require('../models/Post');
-const Comment = require('../models/Comment');
 
 function isSameUser(requestingUser, loggedInUser) {
   return requestingUser === loggedInUser;
 }
+// function canBeFriends(currUser, anotherUser){
+
+//     if(currUser)
+// }
 
 exports.profile = async (req, res) => {
   try {
@@ -120,3 +123,30 @@ exports.updateProfile = [
     }
   },
 ];
+exports.getMutuals = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userid)
+      .populate('friends')
+      .exec();
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
+    if (!sameUser) {
+      return res.status(403).send('You are not authorized');
+    }
+    const { friends } = user;
+    const mutuals = [];
+    for (let i = 0; i < friends.length; i++) {
+      const currFriend = friends[i];
+      for (let j = 0; j < currFriend.friends.length; j++) {
+        const mutual = currFriend.friends[j].toString();
+        if (mutual !== user._id.toString() && !friends.includes(mutual)) {
+          mutuals.push(mutual);
+          break;
+        }
+      }
+    }
+    return res.send(mutuals);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('User not found');
+  }
+};
