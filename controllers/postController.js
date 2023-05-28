@@ -60,3 +60,17 @@ exports.updatePost = [
     }
   },
 ];
+exports.deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postid).exec();
+    const sameUser = req.user.user._id === post.author.toString();
+    if (!sameUser) {
+      return res.status(403).send('You are not authorized');
+    }
+    await Post.findByIdAndDelete(req.params.postid).exec();
+    return res.status(200).send('Post deleted succesfully');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
