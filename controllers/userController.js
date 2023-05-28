@@ -90,3 +90,33 @@ exports.posts = async (req, res) => {
     return res.status(403).send('Something went wrong');
   }
 };
+exports.updateProfile = [
+  body('first_name').trim().notEmpty().escape(),
+
+  body('last_name').trim().notEmpty().escape(),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const user = await User.findById(req.params.userid);
+      const sameUser = isSameUser(user._id.toString(), req.user.user._id);
+      if (!sameUser) {
+        return res.status(403).send('You are not authorized');
+      }
+      const updatedUser = {
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+      };
+      await User.findOneAndUpdate(
+        { _id: req.user.user._id },
+        { $set: updatedUser }
+      );
+      return res.status(200).send('User updated successfully');
+    } catch (err) {
+      return res.status(404).send('User not found');
+    }
+  },
+];

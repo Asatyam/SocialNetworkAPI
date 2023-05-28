@@ -72,4 +72,9 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.posts
 );
+router.post(
+  '/users/:userid/editProfile',
+  passport.authenticate('jwt', { session: false }),
+  userController.updateProfile
+);
 module.exports = router;
