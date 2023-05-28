@@ -107,4 +107,9 @@ router.delete(
   passport.authenticate('jwt', { session: false }),
   postController.deletePost
 );
+router.patch(
+  '/posts/:postid/like',
+  passport.authenticate('jwt', { session: false }),
+  postController.likePost
+);
 module.exports = router;

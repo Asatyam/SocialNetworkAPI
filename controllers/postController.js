@@ -74,3 +74,20 @@ exports.deletePost = async (req, res) => {
     return res.status(404).send('Something went wrong');
   }
 };
+exports.likePost = async (req, res) => {
+  try {
+    const [post, user] = await Promise.all([
+      Post.findById(req.params.postid).exec(),
+      User.findById(req.user.user._id).exec(),
+    ]);
+    post.likes.push(req.user.user._id);
+    user.likes.push(post._id);
+    console.log(post._id);
+    await post.save();
+    await user.save();
+    return res.status(200).send('Liked post successfully');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
