@@ -15,6 +15,7 @@
         "no-process-env":"off",
         "comma-dangle":"off",
         "no-shadow":"off",
-        "no-underscore-dangle":"off"
+        "no-underscore-dangle":"off",
+        "no-plusplus":"off"
     }
 }
