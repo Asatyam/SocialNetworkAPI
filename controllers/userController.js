@@ -3,16 +3,19 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 
+function isSameUser(requestingUser, loggedInUser) {
+  return requestingUser === loggedInUser;
+}
+
 exports.profile = async (req, res) => {
   try {
-    let sameUser = false;
-
     const [user, posts] = await Promise.all([
       User.findById(req.params.userid).exec(),
       Post.find({ author: req.params.userid }).exec(),
     ]);
-    if (user._id.toString() === req.user.user._id) {
-      sameUser = true;
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
+    if (!user) {
+      return res.status(400).send('User not found');
     }
     return res.status(200).send({
       user,
@@ -28,8 +31,12 @@ exports.friends = async (req, res) => {
     const user = await User.findById(req.params.userid)
       .populate('friends')
       .exec();
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
     const { friends } = user;
-    return res.status(200).send({ friends });
+    return res.status(200).send({ friends, sameUser });
   } catch (err) {
     console.log(err);
     return res.status(404).send({ message: 'There are no friends' });
@@ -40,8 +47,12 @@ exports.likedPosts = async (req, res) => {
     const user = await User.findById(req.params.userid)
       .populate('likes')
       .exec();
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
     const { likes } = user;
-    return res.status(200).send({ likes });
+    return res.status(200).send({ likes, sameUser });
   } catch (err) {
     return res.status(404).send({ message: ' No liked posts' });
   }
@@ -52,7 +63,6 @@ exports.friendRequests = async (req, res) => {
       .status(403)
       .send('You are not allowed to see others friend requests');
   }
-
   try {
     const user = await User.findById(req.params.userid)
       .populate('requests')
@@ -62,5 +72,19 @@ exports.friendRequests = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(404).send('Something went wrong');
+  }
+};
+exports.posts = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userid).populate('posts').exec();
+    if (!user) {
+      return res.status(400).send('User not found');
+    }
+    const { posts } = user;
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
+    return res.status(200).send({ posts, sameUser });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).send('Something went wrong');
   }
 };
