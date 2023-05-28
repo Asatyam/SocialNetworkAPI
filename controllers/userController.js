@@ -23,3 +23,15 @@ exports.profile = async (req, res) => {
     return res.status(404).send({ message: 'User not found' });
   }
 };
+exports.friends = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userid)
+      .populate('friends')
+      .exec();
+    const { friends } = user;
+    return res.status(200).send({ friends });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send({ message: 'There are no friends' });
+  }
+};

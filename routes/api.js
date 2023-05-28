@@ -52,5 +52,10 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.profile
 );
+router.get(
+  '/users/:userid/friends',
+  passport.authenticate('jwt', { session: false }),
+  userController.friends
+);
 
 module.exports = router;
