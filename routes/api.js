@@ -62,5 +62,9 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.likedPosts
 );
-
+router.get(
+  '/users/:userid/requests',
+  passport.authenticate('jwt', { session: false }),
+  userController.friendRequests
+);
 module.exports = router;
