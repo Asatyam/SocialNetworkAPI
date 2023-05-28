@@ -80,12 +80,41 @@ exports.likePost = async (req, res) => {
       Post.findById(req.params.postid).exec(),
       User.findById(req.user.user._id).exec(),
     ]);
-    post.likes.push(req.user.user._id);
-    user.likes.push(post._id);
-    console.log(post._id);
-    await post.save();
-    await user.save();
-    return res.status(200).send('Liked post successfully');
+    const userIndex = post.likes.indexOf(user._id);
+    if (userIndex === -1) {
+      post.likes.push(req.user.user._id);
+      user.likes.push(post._id);
+      console.log(post._id);
+      await post.save();
+      await user.save();
+      return res.status(200).send('Liked post successfully');
+    }
+
+    return res.status(402).send('Already liked the post');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
+exports.unlikePost = async (req, res) => {
+  try {
+    const [post, user] = await Promise.all([
+      Post.findById(req.params.postid).exec(),
+      User.findById(req.user.user._id).exec(),
+    ]);
+    if (!post) {
+      return res.status(404).send('Post not found');
+    }
+    const userIndex = post.likes.indexOf(user._id);
+    const postIndex = user.likes.indexOf(post._id);
+    if (userIndex !== -1 && postIndex !== -1) {
+      user.likes.splice(postIndex, 1);
+      post.likes.splice(userIndex, 1);
+      await post.save();
+      await user.save();
+      return res.status(200).send('Unliked post successfully');
+    }
+    return res.status(200).send('Something is not right');
   } catch (err) {
     console.log(err);
     return res.status(404).send('Something went wrong');

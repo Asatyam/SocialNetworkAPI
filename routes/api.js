@@ -112,4 +112,9 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   postController.likePost
 );
+router.patch(
+  '/posts/:postid/unlike',
+  passport.authenticate('jwt', { session: false }),
+  postController.unlikePost
+);
 module.exports = router;
