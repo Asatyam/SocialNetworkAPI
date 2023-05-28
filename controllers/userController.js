@@ -5,10 +5,6 @@ const Post = require('../models/Post');
 function isSameUser(requestingUser, loggedInUser) {
   return requestingUser === loggedInUser;
 }
-// function canBeFriends(currUser, anotherUser){
-
-//     if(currUser)
-// }
 
 exports.profile = async (req, res) => {
   try {
@@ -150,3 +146,9 @@ exports.getMutuals = async (req, res) => {
     return res.status(404).send('User not found');
   }
 };
+
+// Completed all the user related get routes
+// Remaining to do:
+// - Delete user
+// - Update more user details
+// - Maybe even more settings like facebook
