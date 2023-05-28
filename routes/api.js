@@ -97,4 +97,9 @@ router.post(
   passport.authenticate('jwt', { session: false }),
   postController.addPost
 );
+router.patch(
+  '/posts/:postid',
+  passport.authenticate('jwt', { session: false }),
+  postController.updatePost
+);
 module.exports = router;

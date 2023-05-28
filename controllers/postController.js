@@ -36,3 +36,27 @@ exports.addPost = [
     }
   },
 ];
+exports.updatePost = [
+  body('content', 'content cannot be empty').trim().notEmpty().escape(),
+
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const post = await Post.findById(req.params.postid);
+      const sameUser = req.user.user._id === post.author.toString();
+      if (!sameUser) {
+        return res.status(403).send('You are not authorized');
+      }
+      await Post.findByIdAndUpdate(req.params.postid, {
+        $set: { content: req.body.content },
+      });
+      return res.status(200).send('post updated successfully');
+    } catch (err) {
+      console.log(err);
+      return res.status(403).send('Something went wrong');
+    }
+  },
+];
