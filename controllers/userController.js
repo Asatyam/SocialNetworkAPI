@@ -35,3 +35,14 @@ exports.friends = async (req, res) => {
     return res.status(404).send({ message: 'There are no friends' });
   }
 };
+exports.likedPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userid)
+      .populate('likes')
+      .exec();
+    const { likes } = user;
+    return res.status(200).send({ likes });
+  } catch (err) {
+    return res.status(404).send({ message: ' No liked posts' });
+  }
+};
