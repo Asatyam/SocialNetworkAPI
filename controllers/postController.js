@@ -7,7 +7,7 @@ exports.getPost = async (req, res) => {
   try {
     const [post, comments] = await Promise.all([
       Post.findById(req.params.postid).populate('author likes').exec(),
-      Comment.find({ post: req.params.id }).exec(),
+      Comment.find({ post: req.params.postid }).exec(),
     ]);
     return res.status(200).send({ post, comments });
   } catch (err) {
@@ -120,3 +120,4 @@ exports.unlikePost = async (req, res) => {
     return res.status(404).send('Something went wrong');
   }
 };
+// add image

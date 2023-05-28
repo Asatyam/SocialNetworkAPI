@@ -3,6 +3,7 @@ const passport = require('passport');
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
+const commentController = require('../controllers/commentController');
 
 const router = express.Router();
 router.get('/', authController.index);
@@ -116,5 +117,16 @@ router.patch(
   '/posts/:postid/unlike',
   passport.authenticate('jwt', { session: false }),
   postController.unlikePost
+);
+// comment routes
+router.post(
+  '/posts/:postid/comments',
+  passport.authenticate('jwt', { session: false }),
+  commentController.postComment
+);
+router.delete(
+  '/posts/:postid/comments/:commentid',
+  passport.authenticate('jwt', { session: false }),
+  commentController.deleteComment
 );
 module.exports = router;
