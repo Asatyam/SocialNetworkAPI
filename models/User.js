@@ -5,7 +5,6 @@ const { Schema } = mongoose;
 const UserSchema = new Schema({
   email: { type: String },
   password: { type: String },
-  posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   likes: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   first_name: { type: String },
   last_name: { type: String },

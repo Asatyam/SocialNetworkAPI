@@ -76,11 +76,13 @@ exports.friendRequests = async (req, res) => {
 };
 exports.posts = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userid).populate('posts').exec();
+    const [user, posts] = await Promise.all([
+      User.findById(req.params.userid).exec(),
+      Post.find({ author: req.params.userid }).exec(),
+    ]);
     if (!user) {
       return res.status(400).send('User not found');
     }
-    const { posts } = user;
     const sameUser = isSameUser(user._id.toString(), req.user.user._id);
     return res.status(200).send({ posts, sameUser });
   } catch (err) {

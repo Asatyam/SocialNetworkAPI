@@ -16,13 +16,11 @@ const populateDB = async () => {
       image_url: faker.image.avatar(),
       password: faker.internet.password(),
     });
-    for (let j = 0; j < 20; j++) {
-      const post = await Post.create({
+    for (let j = 0; j < 10; j++) {
+      await Post.create({
         content: faker.lorem.paragraph(),
         author: user.id,
       });
-      console.log(`adding post no ${j + 1}`);
-      user.posts.push(post);
     }
     testUser.friends.push(user.id);
     user.friends.push(testUser.id);
