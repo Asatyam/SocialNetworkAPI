@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
+const postController = require('../controllers/postController');
 
 const router = express.Router();
 router.get('/', authController.index);
@@ -47,6 +48,8 @@ router.get(
     res.send(req.user);
   }
 );
+
+// User routes
 router.get(
   '/users/:userid',
   passport.authenticate('jwt', { session: false }),
@@ -82,4 +85,12 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.getMutuals
 );
+
+// Post routes
+router.get(
+  '/posts/:postid',
+  passport.authenticate('jwt', { session: false }),
+  postController.getPost
+);
+
 module.exports = router;
