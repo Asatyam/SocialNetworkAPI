@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const authController = require('../controllers/authController');
+const userController = require('../controllers/userController');
 
 const router = express.Router();
 router.get('/', authController.index);
@@ -38,5 +39,18 @@ router.get('/failure', (req, res) => {
 });
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
+
+router.get(
+  '/isAuth',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.send(req.user);
+  }
+);
+router.get(
+  '/users/:userid',
+  passport.authenticate('jwt', { session: false }),
+  userController.profile
+);
 
 module.exports = router;
