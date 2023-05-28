@@ -72,26 +72,33 @@ module.exports = function setUpPassport(passport) {
           'id',
           'first_name',
           'last_name',
-          'email',
+          'emails',
           'picture.type(album)',
         ],
+        enableProof: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
           const picture = `https://graph.facebook.com/${profile.id}/picture?width=200&height=200&access_token=${accessToken}`;
           let user = await User.findOne({ facebook_id: profile.id });
           console.log({ profile, picture });
-          if (!user) {
-            user = new User({
-              first_name: profile._json.first_name,
-              last_name: profile._json.last_name,
-              facebook_id: profile.id,
-              email: profile.emails ? profile.emails[0].value : '',
-              image_url: picture,
-            });
-            await user.save();
+          if (typeof profile.emails !== 'undefined') {
+            if (!user) {
+              user = new User({
+                first_name: profile._json.first_name,
+                last_name: profile._json.last_name,
+                facebook_id: profile.id,
+                email: profile.emails ? profile.emails[0].value : '',
+                image_url: picture,
+              });
+              await user.save();
+            }
+            return done(null, user);
           }
-          return done(null, user);
+          return done(
+            'Email is  not registered in this account. Please try another method',
+            user
+          );
         } catch (err) {
           return done(err);
         }
