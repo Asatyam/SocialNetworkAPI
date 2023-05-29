@@ -10,7 +10,7 @@ exports.profile = async (req, res) => {
   try {
     const [user, posts] = await Promise.all([
       User.findById(req.params.userid).exec(),
-      Post.find({ author: req.params.userid }).exec(),
+      Post.find({ author: req.params.userid }).sort({ date: -1 }).exec(),
     ]);
     const sameUser = isSameUser(user._id.toString(), req.user.user._id);
     if (!user) {
@@ -144,6 +144,50 @@ exports.getMutuals = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(404).send('User not found');
+  }
+};
+exports.sendRequest = async (req, res) => {
+  try {
+    if (req.user.user._id === req.params.userid) {
+      return res.status(402).send('You cannot send friend request to yourself');
+    }
+    const sentUser = await User.findById(req.params.userid).exec();
+    const user = await User.findById(req.user.user._id).exec();
+    const alreadyFriend = user.friends.indexOf(req.params.userid);
+    if (alreadyFriend !== -1) {
+      return res.status(402).send('You are already friends');
+    }
+    const requestAlreadySent = sentUser.requests.indexOf(req.user.user._id);
+    if (requestAlreadySent !== -1) {
+      return res.status(402).send('You have already sent the request');
+    }
+    sentUser.requests.push(req.user.user._id);
+    await sentUser.save();
+    return res.status(200).send('Request successfully sent');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
+exports.acceptRequest = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.user._id).exec();
+    const requestingUser = await User.findById(req.params.userid).exec();
+    const indexOfrequest = user.requests.indexOf(req.params.userid);
+    if (indexOfrequest !== -1) {
+      user.friends.push(req.params.userid);
+      requestingUser.friends.push(req.user.user._id);
+      user.requests.splice(indexOfrequest, 1);
+      await user.save();
+      await requestingUser.save();
+      return res.status(200).send('accepted request successfully');
+    }
+    return res
+      .status(403)
+      .send('Cannot accept friend request of user not in requests');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
   }
 };
 

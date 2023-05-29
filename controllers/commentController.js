@@ -99,3 +99,4 @@ exports.unlikeComment = async (req, res) => {
 // Features remaining to implement
 // - Reply on comments
 // - likes on replies
+// - sort comment by likes and date

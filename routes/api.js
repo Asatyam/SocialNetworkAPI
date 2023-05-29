@@ -86,7 +86,16 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.getMutuals
 );
-
+router.patch(
+  '/users/:userid/sendRequest',
+  passport.authenticate('jwt', { session: false }),
+  userController.sendRequest
+);
+router.patch(
+  '/users/:userid/acceptRequest',
+  passport.authenticate('jwt', { session: false }),
+  userController.acceptRequest
+);
 // Post routes
 router.get(
   '/posts/:postid',
