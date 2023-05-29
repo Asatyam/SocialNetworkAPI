@@ -13,5 +13,7 @@ const UserSchema = new Schema({
   facebook_id: { type: String, default: '' },
   image_url: { type: String, default: '' },
 });
-
+UserSchema.virtual('full_name').get(function fullName() {
+  return `${this.first_name} ${this.last_name}`;
+});
 module.exports = mongoose.model('User', UserSchema);
