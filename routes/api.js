@@ -119,6 +119,11 @@ router.patch(
   postController.unlikePost
 );
 // comment routes
+router.get(
+  '/posts/:postid/comments',
+  passport.authenticate('jwt', { session: false }),
+  commentController.getComments
+);
 router.post(
   '/posts/:postid/comments',
   passport.authenticate('jwt', { session: false }),
@@ -128,5 +133,15 @@ router.delete(
   '/posts/:postid/comments/:commentid',
   passport.authenticate('jwt', { session: false }),
   commentController.deleteComment
+);
+router.patch(
+  '/posts/:postid/comments/:commentid/like',
+  passport.authenticate('jwt', { session: false }),
+  commentController.likeComment
+);
+router.patch(
+  '/posts/:postid/comments/:commentid/unlike',
+  passport.authenticate('jwt', { session: false }),
+  commentController.unlikeComment
 );
 module.exports = router;
