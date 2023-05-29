@@ -228,10 +228,7 @@ exports.rejectRequest = async (req, res) => {
 };
 exports.cancelRequest = async (req, res) => {
   try {
-    const [user, requestedUser] = await Promise.all([
-      User.findById(req.user.user._id).exec(),
-      User.findById(req.params.userid).exec(),
-    ]);
+    const requestedUser = await User.findById(req.params.userid).exec();
     const isRequest = requestedUser.requests.indexOf(req.user.user._id);
     if (isRequest !== -1) {
       requestedUser.requests.splice(isRequest, 1);
@@ -241,6 +238,16 @@ exports.cancelRequest = async (req, res) => {
     return res.status(404).send('No previous request');
   } catch (err) {
     console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
+exports.sentRequests = async (req, res) => {
+  try {
+    const sentRequests = await User.find({
+      requests: req.user.user._id,
+    }).exec();
+    return res.status(200).send({ sentRequests });
+  } catch (err) {
     return res.status(404).send('Something went wrong');
   }
 };

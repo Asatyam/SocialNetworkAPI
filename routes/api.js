@@ -111,6 +111,11 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   userController.cancelRequest
 );
+router.get(
+  '/users/:userid/sentRequests',
+  passport.authenticate('jwt', { session: false }),
+  userController.sentRequests
+);
 // Post routes
 router.get(
   '/posts/:postid',
