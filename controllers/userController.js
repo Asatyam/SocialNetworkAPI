@@ -256,4 +256,4 @@ exports.sentRequests = async (req, res) => {
 // - Delete user
 // - Update more user details
 // - Maybe even more settings like facebook
-// - See user's sent requests
+// - See user's sent requests ✅
