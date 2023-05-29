@@ -96,3 +96,6 @@ exports.unlikeComment = async (req, res) => {
     return res.status(404).send('Something went wrong');
   }
 };
+// Features remaining to implement
+// - Reply on comments
+// - likes on replies
