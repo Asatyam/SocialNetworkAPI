@@ -190,7 +190,60 @@ exports.acceptRequest = async (req, res) => {
     return res.status(404).send('Something went wrong');
   }
 };
-
+exports.removeFriend = async (req, res) => {
+  try {
+    const [currUser, liveUser] = await Promise.all([
+      User.findById(req.user.user._id),
+      User.findById(req.params.userid),
+    ]);
+    const index1 = currUser.friends.indexOf(liveUser._id);
+    const index2 = liveUser.friends.indexOf(currUser._id);
+    if (index1 !== -1 && index2 !== -1) {
+      currUser.friends.splice(index1, 1);
+      liveUser.friends.splice(index2, 1);
+      await currUser.save();
+      await liveUser.save();
+      return res.status(200).send('Remvoed friend');
+    }
+    return res.status(404).send('You are not friends with the user');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
+exports.rejectRequest = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.user._id).exec();
+    const isRequest = user.requests.indexOf(req.params.userid);
+    if (isRequest !== -1) {
+      user.requests.splice(isRequest, 1);
+      await user.save();
+      return res.status(200).send('Rejected friend request');
+    }
+    return res.status(404).send('User is not in your request list');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
+exports.cancelRequest = async (req, res) => {
+  try {
+    const [user, requestedUser] = await Promise.all([
+      User.findById(req.user.user._id).exec(),
+      User.findById(req.params.userid).exec(),
+    ]);
+    const isRequest = requestedUser.requests.indexOf(req.user.user._id);
+    if (isRequest !== -1) {
+      requestedUser.requests.splice(isRequest, 1);
+      await requestedUser.save();
+      return res.status(200).send('Cancelled friend request');
+    }
+    return res.status(404).send('No previous request');
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
 // Completed all the user related get routes
 // Remaining to do:
 // - Delete user

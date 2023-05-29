@@ -96,6 +96,21 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   userController.acceptRequest
 );
+router.patch(
+  '/users/:userid/removeFriend',
+  passport.authenticate('jwt', { session: false }),
+  userController.removeFriend
+);
+router.patch(
+  '/users/:userid/rejectRequest',
+  passport.authenticate('jwt', { session: false }),
+  userController.rejectRequest
+);
+router.patch(
+  '/users/:userid/cancelRequest',
+  passport.authenticate('jwt', { session: false }),
+  userController.cancelRequest
+);
 // Post routes
 router.get(
   '/posts/:postid',
@@ -153,4 +168,5 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   commentController.unlikeComment
 );
+
 module.exports = router;
