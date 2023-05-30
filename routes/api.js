@@ -40,7 +40,11 @@ router.get('/failure', (req, res) => {
   res.send('Failed to login');
 });
 router.post('/login', authController.login);
-router.post('/logout', authController.logout);
+router.post(
+  '/logout',
+  passport.authenticate('jwt', { session: false }),
+  authController.logout
+);
 
 router.get(
   '/isAuth',

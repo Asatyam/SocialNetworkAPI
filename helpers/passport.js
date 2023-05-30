@@ -36,7 +36,7 @@ module.exports = function setUpPassport(passport) {
         try {
           const user = await User.findOne({ email: username });
           if (!user) {
-            return done(null, false, { messsage: 'User not found' });
+            return done(null, false, { message: 'User not found' });
           }
           bcryptjs.compare(password, user.password, (err, res) => {
             if (res) {
