@@ -47,7 +47,7 @@ exports.addPost = [
       const post = new Post({
         content: req.body.content,
         author: req.user.user._id,
-        image: req.file.path ? req.file.path : '',
+        image: typeof req.file === 'undefined' ? '' : req.file.path,
       });
       await post.save();
       return res.status(200).send('post added successfully');
