@@ -7,6 +7,7 @@ exports.getComments = async (req, res) => {
   try {
     const comments = await Comment.find({ post: req.params.postid })
       .populate('author likes')
+      .sort({ likes: -1 })
       .exec();
 
     return res.status(200).send({ comments });

@@ -1,7 +1,25 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+const storage = new CloudinaryStorage({
+  cloudinary,
+  folder: 'demo',
+  allowedFormats: ['jpg', 'jpeg', 'png'],
+  transformation: [{ width: 500, height: 500, crop: 'limit' }],
+});
+const parser = multer({ storage });
 
 exports.getPost = async (req, res) => {
   try {
@@ -16,7 +34,9 @@ exports.getPost = async (req, res) => {
   }
 };
 exports.addPost = [
-  body('content', 'content cannot be empty').trim().notEmpty().escape(),
+  parser.single('file'),
+
+  body('content', 'content cannot be empty').trim().notEmpty(),
 
   async (req, res) => {
     const errors = validationResult(req);
@@ -27,6 +47,7 @@ exports.addPost = [
       const post = new Post({
         content: req.body.content,
         author: req.user.user._id,
+        image: req.file.path ? req.file.path : '',
       });
       await post.save();
       return res.status(200).send('post added successfully');
@@ -90,7 +111,7 @@ exports.likePost = async (req, res) => {
       return res.status(200).send('Liked post successfully');
     }
 
-    return res.status(402).send('Already liked the post');
+    return res.status(403).send('Already liked the post');
   } catch (err) {
     console.log(err);
     return res.status(404).send('Something went wrong');
@@ -114,10 +135,28 @@ exports.unlikePost = async (req, res) => {
       await user.save();
       return res.status(200).send('Unliked post successfully');
     }
-    return res.status(200).send('Something is not right');
+    return res.status(403).send('Something is not right');
   } catch (err) {
     console.log(err);
     return res.status(404).send('Something went wrong');
+  }
+};
+exports.feed = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.user._id).exec();
+    const { friends } = user;
+    friends.push(req.user.user._id);
+    const friendsPosts = await Post.find({
+      author: { $in: friends },
+    })
+      .sort({ date: -1 })
+      .populate('author')
+      .limit(20)
+      .exec();
+    return res.status(200).send({ friendsPosts });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send(err);
   }
 };
 // add image

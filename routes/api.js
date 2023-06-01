@@ -56,6 +56,11 @@ router.get(
 
 // User routes
 router.get(
+  '/feed',
+  passport.authenticate('jwt', { session: false }),
+  postController.feed
+);
+router.get(
   '/users/:userid',
   passport.authenticate('jwt', { session: false }),
   userController.profile
