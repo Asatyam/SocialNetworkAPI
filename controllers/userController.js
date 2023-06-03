@@ -1,9 +1,47 @@
+/* eslint-disable operator-linebreak */
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('../models/User');
 const Post = require('../models/Post');
+require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+const storage = new CloudinaryStorage({
+  cloudinary,
+  folder: 'demo',
+  allowedFormats: ['jpg', 'jpeg', 'png'],
+  transformation: [{ width: 500, height: 500, crop: 'limit' }],
+});
+const parser = multer({ storage });
 
 function isSameUser(requestingUser, loggedInUser) {
   return requestingUser === loggedInUser;
+}
+function shuffle(original) {
+  const array = [...original];
+  let currentIndex = array.length;
+  let randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex !== 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
 }
 
 exports.profile = async (req, res) => {
@@ -90,6 +128,8 @@ exports.posts = async (req, res) => {
   }
 };
 exports.updateProfile = [
+  parser.single('file'),
+
   body('first_name').trim().notEmpty().escape(),
 
   body('last_name').trim().notEmpty().escape(),
@@ -105,9 +145,11 @@ exports.updateProfile = [
       if (!sameUser) {
         return res.status(403).send('You are not authorized');
       }
+      console.log(req.file);
       const updatedUser = {
         first_name: req.body.first_name,
         last_name: req.body.last_name,
+        image_url: typeof req.file === 'undefined' ? user.image_url : req.file.path,
       };
       await User.findOneAndUpdate(
         { _id: req.user.user._id },
@@ -130,15 +172,21 @@ exports.getMutuals = async (req, res) => {
     }
     const { friends } = user;
     const mutuals = [];
-    for (let i = 0; i < friends.length; i++) {
-      const currFriend = friends[i];
-      for (let j = 0; j < currFriend.friends.length; j++) {
-        const mutual = currFriend.friends[j].toString();
-        if (mutual !== user._id.toString() && !friends.includes(mutual)) {
-          mutuals.push(mutual);
-          break;
-        }
+    const users = await User.find({}).exec();
+    const friendsid = friends.map((friend) => friend._id.toString());
+    const valid = users.filter((u) => {
+      const condition =
+        u._id.toString() === req.user.user._id ||
+        friendsid.includes(u._id.toString());
+      if (condition) {
+        return false;
       }
+      return true;
+    });
+    const shuffled = shuffle(valid);
+    let i = 0;
+    while (mutuals.length < 10 && typeof valid[i] !== 'undefined') {
+      mutuals.push(shuffled[i++]);
     }
     return res.send(mutuals);
   } catch (err) {
