@@ -125,6 +125,11 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   userController.sentRequests
 );
+router.patch(
+  '/users/:userid/deletePhoto',
+  passport.authenticate('jwt', { session: false }),
+  userController.deletePhoto
+);
 // Post routes
 router.get(
   '/posts/:postid',

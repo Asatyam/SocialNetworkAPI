@@ -149,7 +149,8 @@ exports.updateProfile = [
       const updatedUser = {
         first_name: req.body.first_name,
         last_name: req.body.last_name,
-        image_url: typeof req.file === 'undefined' ? user.image_url : req.file.path,
+        image_url:
+          typeof req.file === 'undefined' ? user.image_url : req.file.path,
       };
       await User.findOneAndUpdate(
         { _id: req.user.user._id },
@@ -161,6 +162,23 @@ exports.updateProfile = [
     }
   },
 ];
+exports.deletePhoto = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userid).exec();
+    console.log(user);
+    const sameUser = isSameUser(user._id.toString(), req.user.user._id);
+    if (!sameUser) {
+      return res.status(401).send('You are not authorized');
+    }
+    user.image_url = '';
+    console.log(user.image_url);
+    await user.save();
+    return res.status(200).send({ message: 'Removed profile photo' });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send('Something went wrong');
+  }
+};
 exports.getMutuals = async (req, res) => {
   try {
     const user = await User.findById(req.params.userid)
