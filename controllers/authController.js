@@ -71,7 +71,12 @@ exports.signup = [
           if (err) {
             console.log(err);
           } else {
-            res.status(200).json({ message: 'User created', user });
+            const body = {
+              _id: user._id,
+              email: user.email,
+            };
+            const token = jwt.sign({ user: body }, process.env.SECRET);
+            res.status(200).json({ message: 'User created', user, token });
           }
         });
       } catch (err) {
