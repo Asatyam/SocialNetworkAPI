@@ -91,7 +91,7 @@ router.post(
   userController.updateProfile
 );
 router.get(
-  '/users/:userid/getMutuals',
+  '/users/:userid/mutuals',
   passport.authenticate('jwt', { session: false }),
   userController.getMutuals
 );
