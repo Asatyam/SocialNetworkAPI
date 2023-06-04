@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const { body, validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -23,6 +24,9 @@ const parser = multer({ storage });
 
 exports.getPost = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.postid)) {
+      return res.status(404).json({ msg: `No post with id :${req.params.postid}` });
+    }
     const [post, comments] = await Promise.all([
       Post.findById(req.params.postid).populate('author likes').exec(),
       Comment.find({ post: req.params.postid }).exec(),
@@ -151,7 +155,6 @@ exports.feed = async (req, res) => {
     })
       .sort({ date: -1 })
       .populate('author')
-      .limit(20)
       .exec();
     return res.status(200).send({ friendsPosts });
   } catch (err) {

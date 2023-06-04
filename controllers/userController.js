@@ -43,7 +43,15 @@ function shuffle(original) {
 
   return array;
 }
-
+exports.users = async (req, res) => {
+  try {
+    const users = await User.find({}).exec();
+    return res.status(200).send({ users });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).send({ message: 'Something went wrong' });
+  }
+};
 exports.profile = async (req, res) => {
   try {
     const [user, posts] = await Promise.all([
