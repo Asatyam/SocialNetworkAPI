@@ -25,7 +25,9 @@ const parser = multer({ storage });
 exports.getPost = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.postid)) {
-      return res.status(404).json({ msg: `No post with id :${req.params.postid}` });
+      return res
+        .status(404)
+        .json({ msg: `No post with id :${req.params.postid}` });
     }
     const [post, comments] = await Promise.all([
       Post.findById(req.params.postid).populate('author likes').exec(),
